@@ -1,0 +1,17 @@
+services:
+  bot:
+    container_name: vpn-bot
+    build:
+      context: .
+    volumes:
+      - ./:/app
+    # environment:
+    #   - PROD=false
+    # ports:
+    #   - "4000:4000"
+    # networks:
+    #   - default
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    # stop_grace_period: 1s
+
