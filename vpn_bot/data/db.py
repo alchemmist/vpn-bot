@@ -1,0 +1,78 @@
+from contextlib import AbstractContextManager
+import sqlalchemy as sa
+import os
+import logging
+
+import sqlalchemy.ext.declarative as dec
+import sqlalchemy.orm as orm
+
+
+SqlAlchemyBase = dec.declarative_base()
+
+
+factory = None
+engine = None
+
+
+def get_db_url():
+    db_folder = os.getenv("DB_FOLDER")
+    db_name = os.getenv("DB_NAME")
+
+    return f"sqlite:///{db_folder}/{db_name}"
+
+
+def global_init():
+    global factory
+    global engine
+
+    if factory:
+        return
+
+    init_filling = not os.path.isfile(
+        f"{os.getenv('DB_FOLDER')}/{os.getenv('DB_NAME')}"
+    )
+
+    logging.info(f"sqlite3_db_url: {get_db_url()}")
+    engine = sa.create_engine(get_db_url(), echo=False)
+    engine.update_execution_options(connect_args={"connect_timeout": 5})
+    factory = orm.sessionmaker(bind=engine)
+
+    from . import __all_models
+
+    SqlAlchemyBase.metadata.create_all(engine)
+
+    if init_filling:
+        ...
+        # initial filling of the database
+        
+        # For example:
+        # from smartcab.data.eval_types import init_base_types
+        # from smartcab.data.hub_password import init_base_password
+        # from smartcab.data.admins import init_admins
+        #
+        # init_base_types()
+        # if (base_type := get_default_eval_types()):
+        #     logging.info(f"Base eval types were created: {', '.join(base_type)}")
+        #
+        # init_base_password()
+        # logging.info(f"Base password was set: {os.getenv("INIT_PASSWORD")}")
+        #
+        # added_admins = init_admins()
+        # logging.info(f"Admins was set: {", ".join(added_admins)}")
+
+    logging.info("SqLite3 database connection was initialized successfully")
+
+
+class session(AbstractContextManager):
+    def __init__(self):
+        global factory
+        self.session = factory() # type: ignore
+
+    def __enter__(self):
+        return self.session
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            self.session.rollback()
+        self.session.close()
+

@@ -8,13 +8,7 @@ git clone git@github.com:romanenko-vova/vpn_bot.git
 cd vpn_bot
 ```
 
-Before running create `.env` file and define `TELEGRAM_BOT_TOKEN` variable. For example:
-```
-# .env
-
-TELEGRAM_BOT_TOKEN=<token_for_your_bot>
-```
-
+Before running, rename `.env.example` file to `.env` and define `TELEGRAM_BOT_TOKEN` variable.
 Then you cun run bot with poetry or Docker:
 
 ### Run with Docker

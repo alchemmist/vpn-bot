@@ -1,24 +1,21 @@
-from vpn_bot import config
+from vpn_bot import config, handlers
+from vpn_bot.data import db
 
 import logging
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Добро пожаловать в vpn-bot")
+from telegram.ext import ApplicationBuilder, CommandHandler
 
 
 def main():
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO
+    )
+
+    db.global_init()
+
     app = ApplicationBuilder().token(config.TELEGRAM_BOT_TOKEN).build()
 
-    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("start", handlers.start))
     app.run_polling()
 
 
