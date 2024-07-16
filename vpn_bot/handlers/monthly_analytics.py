@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, date
 
 from prettytable import PrettyTable
@@ -7,20 +6,19 @@ from telegram.constants import ParseMode
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from vpn_bot import exeptions, config
+from vpn_bot import exceptions, config
 from vpn_bot.handlers.keyboards import get_monthly_analytics_keyboard
 
 
-async def monthly_analytics(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message:
-        logging.error("Can't get message from update")
-        raise exeptions.UpdateHaventMessageError()
+async def monthly_analytics(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    if not (msg := update.message):
+        raise exceptions.UpdateHaventMessage("Can't get message from update in monthlly_analitics callback hanlder")
 
     today = datetime.today()
     data = get_analytics_data(today)
     analytics_table = create_analytics_table(data)
     
-    await update.message.reply_text(
+    await msg.reply_text(
         analytics_table, 
         reply_markup=get_monthly_analytics_keyboard(config.MONTHLY_ANALYTICS_CALLBACK_PATTERN, today),
         parse_mode=ParseMode.MARKDOWN_V2
@@ -29,10 +27,9 @@ async def monthly_analytics(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def monthly_analytics_button(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if not (query := update.callback_query):
-        logging.error("Can't get query from update")
-        raise exeptions.UpdateHaventQueryError()
+        raise exceptions.UpdateHaventQuery("Can't get query from update in monthly_analitics_button callback handler")
 
-    new_date = _get_datetime_by_callback(str(query.data))
+    new_date = get_datetime_by_callback(str(query.data))
     data = get_analytics_data(new_date)
     analytics_table = create_analytics_table(data)
     await query.edit_message_text(
@@ -58,16 +55,16 @@ def get_analytics_data(date: datetime) -> list[list]:
         ]
     }
     
-    if date.strftime(config.DATE_FORMAT) in data:
+    if date.strftime(config.DATE_FORMAT):
         return data[date.strftime(config.DATE_FORMAT)]
     else:
         return []
 
 
 
-def create_analytics_table(data: list[list]) -> str:
+def create_analytics_table(data: list[list[str]]) -> str:
+    # TODO: refactor: work with ORM ojbect, not list of string
     users_table = PrettyTable()
-
     users_table.field_names = ["Byte", "Username", "Payed"]
 
     for user in data:
@@ -76,7 +73,16 @@ def create_analytics_table(data: list[list]) -> str:
     return "```\n{}```".format(users_table.get_string())
 
 
-def _get_datetime_by_callback(collback: str) -> datetime:
-    month, year = map(int, collback.split("_")[-1].split("."))
+def get_datetime_by_callback(collback: str) -> datetime:
+    if not collback:
+        raise exceptions.CallbackUndefined("Collback is empty in get_datetime_by_callback")
+    if collback == "None":
+        raise exceptions.CallbackUndefined("Collback is None in get_datetime_by_callback")
+
+    try:
+        month, year = map(int, collback.split("_")[-1].split("."))
+    except Exception:
+        raise exceptions.CallbackIncorrectFormat(f"Can't parse collback in get_datetime_by_callback. Callback: '{collback}'")
+        
     return datetime(year, month, 1)
 
