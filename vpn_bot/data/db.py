@@ -37,7 +37,6 @@ def global_init():
     engine.update_execution_options(connect_args={"connect_timeout": 5})
     factory = orm.sessionmaker(bind=engine)
 
-    from . import __all_models
 
     SqlAlchemyBase.metadata.create_all(engine)
 

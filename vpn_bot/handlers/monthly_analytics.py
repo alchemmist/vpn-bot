@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime
 
 from prettytable import PrettyTable
 
@@ -55,7 +55,7 @@ def get_analytics_data(date: datetime) -> list[list]:
         ]
     }
     
-    if date.strftime(config.DATE_FORMAT):
+    if date.strftime(config.DATE_FORMAT) in data:
         return data[date.strftime(config.DATE_FORMAT)]
     else:
         return []
