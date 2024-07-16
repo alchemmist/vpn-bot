@@ -19,6 +19,8 @@ RUN poetry config --no-cache virtualenvs.create false && poetry install --no-cac
 COPY . .
 RUN poetry install --no-cache --no-interaction --no-ansi --only main
 
-CMD ["poetry", "run", "python", "vpn_bot"]
+# RUN poetry run pytest
+
+CMD ["/bin/sh", "-c", "poetry run pytest && poetry run python vpn_bot"]
 
 
