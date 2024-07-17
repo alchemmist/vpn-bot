@@ -11,7 +11,6 @@ class Payment(SqlAlchemyBase, SerializerMixin):
     id = sa.Column(sa.Integer, primary_key=True)
     user_id = sa.Column(sa.Integer, sa.ForeignKey("users.id"), nullable=False)
     date = sa.Column(sa.DateTime, nullable=False)
-    moth = sa.Column(sa.Integer, nullable=False) # QA: Что это за поле? Зачем оно нужно,
-                                                 # если выше мы уже сохранили всю дату со временм
 
     payer = relationship("User")
+

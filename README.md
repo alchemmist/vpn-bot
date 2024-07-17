@@ -1,6 +1,9 @@
 # VPN bot
 A bot to gain access to the WireGuard server
 
+# TO-DO
+- [ ] Дать возможность админу добавлять премиальных пользователей (с бесплатным доступом)
+
 ## Run
 Let's start by cloning this repository and move into it:
 ```bash
