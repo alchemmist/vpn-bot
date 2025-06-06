@@ -27,4 +27,7 @@ poetry install
 poetry run python vpn_bot
 ```
 
+### Demo
+Mounthly alatitics:
 
+<img src="./images/analitics.png" alt="Demo Preview" width="400" align="center">
